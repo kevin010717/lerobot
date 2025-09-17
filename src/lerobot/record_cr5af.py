@@ -440,8 +440,8 @@ dataset_cfg = DatasetRecordConfig(
     single_task="Grab the black cube",
     num_episodes=1,
     push_to_hub=False,
-    episode_time_s=10,
-    reset_time_s=10,
+    episode_time_s=30,
+    reset_time_s=30,
     fps=30,
     video=True,
 
@@ -460,3 +460,9 @@ cfg = RecordConfig(
 
 if __name__ == "__main__":
     record(cfg)  # 直接调用
+    import pandas as pd
+    import os
+    loaded_df = pd.read_parquet('/home/robot/.cache/huggingface/lerobot/seeedstudio123/test/data/chunk-000/episode_000000.parquet')
+    loaded_df.to_csv("full_data.csv", index=False)
+    first_10_rows = loaded_df.head(10)
+    first_10_rows.to_csv("first_10_rows.csv", index=False)
