@@ -3241,6 +3241,8 @@ class DobotDemo1:
     def start(self):
         # 连接并使能
         self.dashboard = DobotApiDashboard(self.ip, self.dashboardPort)
+        self.dashboard.ClearError()
+
         self.feedFour = DobotApiFeedBack(self.ip, self.feedPortFour)
         if self.parseResultId(self.dashboard.EnableRobot())[0] != 0:
             print("使能失败: 检查29999端口是否被占用")
@@ -3522,7 +3524,7 @@ from time import sleep
 
 
 if __name__ == '__main__':
-    # dobot = DobotDemo("192.168.201.1")
+    # dobot = DobotDemo("192.168.5.1")
     # dobot.start()
 
     dobot = DobotDemo1("192.168.5.1")

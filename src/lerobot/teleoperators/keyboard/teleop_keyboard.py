@@ -179,7 +179,7 @@ class KeyboardTeleop(Teleoperator):
         try:
             self.n_joints = len(self.arm)
         except Exception:
-            self.n_joints = 6
+            self.n_joints = 7
 
         self.selected = 0                  # 当前选中的关节索引
         self.step = 5.0                    # 默认步长（度）
@@ -338,7 +338,7 @@ class KeyboardTeleop(Teleoperator):
                 # 若需要同时断开 pynput 监听，可主动 disconnect()
                 return
 
-            if ch in '123456':
+            if ch in '1234567':
                 self.selected = min(max(int(ch) - 1, 0), self.n_joints - 1)
                 msg = f"选择关节 {self.selected + 1}"
                 print(msg)

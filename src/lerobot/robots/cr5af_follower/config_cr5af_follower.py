@@ -30,7 +30,9 @@ class CR5AFFOLLOWERConfig(RobotConfig):
     disable_torque_on_disconnect: bool = True
 
     # `max_relative_target` limits the magnitude of the relative positional target vector for safety purposes.
+    # `max_relative_target` 用于限制相对位置目标向量的幅值，以保证安全。
     # Set this to a positive scalar to have the same value for all motors, or a list that is the same length as
+    # 可以设置为一个正数（所有电机相同），或设置为一个与从动臂电机数量相同长度的列表。
     # the number of motors in your follower arms.
     max_relative_target: int | None = None
 

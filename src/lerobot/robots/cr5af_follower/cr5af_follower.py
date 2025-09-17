@@ -82,6 +82,51 @@ class CR5AFFollower(Robot):
 
         self.feedData = item()  # 定义结构对象
 
+        # for WHEELTEC
+        import serial
+        import time
+        try:
+            # 尝试打开串口
+            self.serial = serial.Serial('/dev/ttyACM0', 115200, timeout=0.05)
+            print("Serial port opened successfully.")
+        except serial.SerialException as e:
+            # 捕获串口异常并打印错误信息
+            print(f"Failed to open serial port: {e}")
+        except Exception as e:
+            # 捕获其他异常并打印错误信息
+            print(f"An unexpected error occurred: {e}")
+        class state:
+            def __init__(self):
+                # WHEELTEC接收串口协议
+                self.motor_address = 0         # byte 0: 电机地址 (默认为 01)
+                self.position_reached = 0       # byte 1: 到达目标位置标志 (0: 未到达, 1: 到达)
+                self.speed_high  = 0            # byte 2: 速度的高八位
+                self.speed_low  = 0             # byte 3: 速度的低八位
+                self.angle_high_16_1  = 0       # byte 4: 角度的高 16 位中的高 8 位
+                self.angle_high_16_2   = 0      # byte 5: 角度的高 16 位中的低 8 位
+                self.angle_low_16_1   = 0       # byte 6: 角度的低 16 位中的高 8 位
+                self.angle_low_16_2   = 0       # byte 7: 角度的低 16 位中的低 8 位
+                self.rcc_check   = 0            # byte 8: RCC 校验位
+                self.speed    = 0               # 解析后的速度
+                self.angle   = 0                # 解析后的角度
+        self.grip_state = state()
+        self.grip_angle = 0
+
+        # # test
+        # # 创建要发送的数据
+        # send_data = bytearray([0x7b, 0x01, 0x02, 0x01, 0x20, 0x46, 0x50, 0x01, 0x2c, 0x62, 0x7d])  # 收缩
+        # # send_data = bytearray([0x7b, 0x01, 0x02, 0x00, 0x20, 0x46, 0x50, 0x01, 0x2c, 0x63, 0x7d])  # 张开
+        # self.serial.write(send_data)  # 发送数据
+        # # 读取串口返回的数据
+        # time.sleep(0.1)  # 等待数据返回
+        # if self.serial.in_waiting > 0:  # 检查是否有数据可读
+        #     recv_data = self.serial.read(9)  # 读取数据
+        #     print("Received data:", recv_data)
+        # # 关闭串口
+        # self.serial.close()
+
+
+
     @property
     def _motors_ft(self) -> dict[str, type]:
         return {f"{motor}.pos": float for motor in self.bus.motors}
@@ -111,9 +156,14 @@ class CR5AFFollower(Robot):
         return [int(num) for num in re.findall(r'-?\d+', valueRecv)] or [2]
     @property
     def is_connected(self) -> bool:
+        # for cr5af
         if self.parseResultId(self.dashboard.EnableRobot())[0] != 0:
             print("使能失败: 检查29999端口是否被占用")
             return
+        
+        # for WHEELTEC
+
+        
         # print("使能成功")
         # sock = self.dashboard.reConnect(self.ip, self.dashboardPort)
         # ok = (sock.connect_ex((self.ip, self.dashboardPort)) == 0)
@@ -250,7 +300,7 @@ class CR5AFFollower(Robot):
         start = time.perf_counter()
         # obs_dict = self.bus.sync_read("Present_Position")  # ！！！！！！！！！！！！！！！
         # obs_dict = {f"{motor}.pos": val for motor, val in obs_dict.items()}
-        # 读取feedbackdata
+        # for cr5af
         feedInfo = self.feedFour.feedBackData()
         if feedInfo is not None:   
             if hex((feedInfo['TestValue'][0])) == '0x123456789abcdef':
@@ -277,6 +327,27 @@ class CR5AFFollower(Robot):
                 self.feedData.RobotMode = int(feedInfo['RobotMode'][0])
                 self.feedData.TimeStamp = int(feedInfo['TimeStamp'][0])
                 '''
+        # for WHEELTEC
+        self.serial.write(bytearray([0x7b, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7a, 0x7d]) )  # 发送状态请求
+        # 读取串口返回的数据
+        # time.sleep(0.1)  # 等待数据返回
+        if self.serial.in_waiting > 0:  # 检查是否有数据可读
+            recv_data = self.serial.read(9)  # 读取数据
+            print("Received data:", recv_data)
+            self.grip_state.motor_address = recv_data[0]                       # byte 0: 电机地址 (默认为 01)
+            self.grip_state.position_reached = recv_data[1]                    # byte 1: 到达目标位置标志 (0: 未到达, 1: 到达)
+            self.grip_state.speed_high = recv_data[2]                          # byte 2: 速度的高八位
+            self.grip_state.speed_low = recv_data[3]                           # byte 3: 速度的低八位
+            self.grip_state.angle_high_16_1 = recv_data[4]                     # byte 4: 角度的高 16 位中的高 8 位
+            self.grip_state.angle_high_16_2 = recv_data[5]                     # byte 5: 角度的高 16 位中的低 8 位
+            self.grip_state.angle_low_16_1 = recv_data[6]                      # byte 6: 角度的低 16 位中的高 8 位
+            self.grip_state.angle_low_16_2 = recv_data[7]                      # byte 7: 角度的低 16 位中的低 8 位
+            self.grip_state.rcc_check = recv_data[8]                           # byte 8: RCC 校验位
+            # 解析速度
+            self.grip_state.speed = (self.grip_state.speed_high << 8) | self.grip_state.speed_low  # 将高八位和低八位拼接成一个 16 位速度值
+            # 解析角度
+            self.grip_state.angle = (self.grip_state.angle_high_16_1 << 24) | (self.grip_state.angle_high_16_2 << 16) | (self.grip_state.angle_low_16_1 << 8) | self.grip_state.angle_low_16_2  # 合并 32 位角度值
+            print(f"self.grip_state:{self.grip_state.__dict__}")
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")
 
@@ -309,16 +380,67 @@ class CR5AFFollower(Robot):
 
         # Cap goal position when too far away from present position.
         # /!\ Slower fps expected due to reading from the follower.
-        if self.config.max_relative_target is not None:
-            present_pos = self.bus.sync_read("Present_Position")
+        if self.config.max_relative_target is not None:  # 没进来!!!!!!!!!!!!!
+            present_pos = self.bus.sync_read("Present_Position") # todo！！！！！！！！！！！！！！！！
             goal_present_pos = {key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()}
             goal_pos = ensure_safe_goal_position(goal_present_pos, self.config.max_relative_target)
 
         # Send goal position to the arm
         # self.bus.sync_write("Goal_Position", goal_pos)
         # print("目标位置:", goal_pos)
-        recvmovemess = self.dashboard.MovJ(*list(goal_pos.values()), 1)
+        # for cr5af
+        # recvmovemess = self.dashboard.MovJ(*list(goal_pos.values()), 1)  # 原始代码，传递所有目标值
+        # 只取前六个关节的目标值
+        recvmovemess = self.dashboard.MovJ(*list(goal_pos.values())[:6], 1)
         # print("发送 MovJ:", recvmovemess)
+        # for WHEELTEC
+        if self.grip_angle != goal_pos["joint_7"]:
+            grip_angle = goal_pos["joint_7"]- self.grip_angle
+            self.grip_angle = goal_pos["joint_7"] # 更新为当前目标值
+        else:
+            grip_angle = 0
+        grip_angle = grip_angle * 10
+        # print("grip_angle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1:", grip_angle)
+
+
+        motor_command = bytearray(11)
+        if grip_angle > 0:
+            motor_command[3] = 0x01      # 转向 1 (顺时针转动)
+        else:
+            motor_command[3] = 0x00      # 转向 1 (顺时针转动)
+        grip_angle = abs(grip_angle)
+        # 填充每个字节的值
+        motor_command[0] = 0x7B      # 帧头 0x7B
+        motor_command[1] = 0x01      # 控制 ID 0x01
+        motor_command[2] = 0x02      # 控制模式 0x02 (位置控制模式)
+        # motor_command[3] = 0x01      # 转向 1 (顺时针转动)
+        motor_command[4] = 0x20      # 步进电机细分值 0x20 (32 细分)
+        # motor_command[5] = 0x49      # 角度数据的高 8 位（原始写法）
+        # motor_command[6] = 0x20      # 角度数据的低 8 位（原始写法）
+        # 协议要求：角度放大10倍后拆分高低8位
+        # 例如 1872° -> 18720 -> 0x4920，高8位0x49，低8位0x20
+        grip_angle_int = int(grip_angle * 10) & 0xFFFF
+        motor_command[5] = (grip_angle_int >> 8) & 0xFF   # 角度高8位
+        motor_command[6] = grip_angle_int & 0xFF          # 角度低8位
+        motor_command[7] = 0x00      # 转速数据的高 8 位
+        motor_command[8] = 0x64      # 转速数据的低 8 位 10rad/s
+        motor_command[9] = 0x00      # BCC 校验位，待计算
+        motor_command[10] = 0x7D     # 帧尾 0x7D
+        # 计算 BCC 校验位（前面 9 个字节的异或和）
+        def calculate_bcc(data):
+            bcc = 0
+            for byte in data:
+                bcc ^= byte  # 对每个字节进行异或运算
+            return bcc
+        motor_command[9] = calculate_bcc(motor_command[:9])
+        print("Motor Command:", " ".join([f"{x:02X}" for x in motor_command]))
+
+        # if goal_pos["joint7"] > 0:
+        #     # 创建要发送的数据
+        #     send_data = bytearray([0x7b, 0x01, 0x02, 0x01, 0x20, 0x46, 0x50, 0x01, 0x2c, 0x62, 0x7d])  # 收缩
+        # else:
+        #     send_data = bytearray([0x7b, 0x01, 0x02, 0x00, 0x20, 0x46, 0x50, 0x01, 0x2c, 0x63, 0x7d])  # 张开
+        self.serial.write(motor_command)  # 发送数据
         return {f"{motor}.pos": val for motor, val in goal_pos.items()}
 
     def disconnect(self):
@@ -326,7 +448,11 @@ class CR5AFFollower(Robot):
         #     raise DeviceNotConnectedError(f"{self} is not connected.")
 
         # self.bus.disconnect(self.config.disable_torque_on_disconnect)
+        # for cr5af
         self.dashboard.DisableRobot()
+        # for WHEELTEC
+        self.serial.close()
+        # for cameras   
         for cam in self.cameras.values():
             cam.disconnect()
 

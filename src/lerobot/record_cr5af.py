@@ -236,7 +236,7 @@ def record_loop(
         # 打包OBS
         observation = robot.get_observation() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        # 推理时有坑
+        # 推理时可能有坑
         # features = dataset.features if dataset is not None else policy.features  # 或其它来源
         # observation_frame = build_dataset_frame(features, observation, prefix="observation")
         
@@ -444,6 +444,7 @@ dataset_cfg = DatasetRecordConfig(
     reset_time_s=10,
     fps=30,
     video=True,
+
 )
 
 # 5) 汇总到 RecordConfig 并开录
