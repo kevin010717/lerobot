@@ -55,7 +55,8 @@ class CR5AFFollower(Robot):
                 "joint_4": Motor(4, "sts3215", norm_mode_body),
                 "joint_5": Motor(5, "sts3215", norm_mode_body),
                 "joint_6": Motor(6, "sts3215", norm_mode_body),
-                # "gripper": Motor(7, "sts3215", MotorNormMode.RANGE_0_100),
+                "joint_7": Motor(7, "sts3215", norm_mode_body),
+                # "joint_7": Motor(7, "sts3215", MotorNormMode.RANGE_0_100),
 
             },
             calibration=self.calibration,
@@ -312,15 +313,15 @@ class CR5AFFollower(Robot):
                 self.feedData.robotCurrentCommandID = feedInfo['CurrentCommandId'][0]
                 self.feedData.QActual = feedInfo['QActual'][0]  # 关节实际角度
 
-                obs_dict = {
-                    "joint_1.pos": self.feedData.QActual[0],
-                    "joint_2.pos": self.feedData.QActual[1],
-                    "joint_3.pos": self.feedData.QActual[2],
-                    "joint_4.pos": self.feedData.QActual[3],
-                    "joint_5.pos": self.feedData.QActual[4],
-                    "joint_6.pos": self.feedData.QActual[5],
-                    # "gripper.pos": 0.0,  # 夹爪没有反馈
-                }
+                # obs_dict = {
+                #     "joint_1.pos": self.feedData.QActual[0],
+                #     "joint_2.pos": self.feedData.QActual[1],
+                #     "joint_3.pos": self.feedData.QActual[2],
+                #     "joint_4.pos": self.feedData.QActual[3],
+                #     "joint_5.pos": self.feedData.QActual[4],
+                #     "joint_6.pos": self.feedData.QActual[5],
+                #     # "gripper.pos": 0.0,  # 夹爪没有反馈
+                # }
                 # 自定义添加所需反馈数据
                 '''
                 self.feedData.DigitalOutputs = int(feedInfo['DigitalOutputs'][0])
@@ -348,6 +349,17 @@ class CR5AFFollower(Robot):
             # 解析角度
             self.grip_state.angle = (self.grip_state.angle_high_16_1 << 24) | (self.grip_state.angle_high_16_2 << 16) | (self.grip_state.angle_low_16_1 << 8) | self.grip_state.angle_low_16_2  # 合并 32 位角度值
             print(f"self.grip_state:{self.grip_state.__dict__}")
+            # obs_dict["joint_7.pos"] = self.grip_state.angle / 10.0  # 解析后的角度，除以10还原
+
+        obs_dict = {
+                "joint_1.pos": self.feedData.QActual[0],
+                "joint_2.pos": self.feedData.QActual[1],
+                "joint_3.pos": self.feedData.QActual[2],
+                "joint_4.pos": self.feedData.QActual[3],
+                "joint_5.pos": self.feedData.QActual[4],
+                "joint_6.pos": self.feedData.QActual[5],
+                "joint_7.pos": self.grip_state.angle / 10.0,  # 解析后的角度，除以10还原
+            }
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")
 
