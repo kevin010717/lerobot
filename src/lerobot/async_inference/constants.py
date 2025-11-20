@@ -27,3 +27,4 @@ SUPPORTED_POLICIES = ["act", "smolvla", "diffusion", "tdmpc", "vqbet", "pi0", "p
 
 # TODO: Add all other robots
 SUPPORTED_ROBOTS = ["so100_follower", "so101_follower", "bi_so100_follower"]
+SUPPORTED_ROBOTS = ["so100_follower", "so101_follower","cr5af_follower"]  # wg add

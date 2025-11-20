@@ -10,7 +10,7 @@ if __name__ == "__main__":
         "--host=0.0.0.0",
         "--port=8888",
         "--fps=30",
-        "--inference_latency=0",
+        # "--inference_latency=0",
         # "--obs_queue_timeout=1",
     ]
     serve()  # run the client

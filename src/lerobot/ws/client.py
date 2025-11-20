@@ -23,13 +23,13 @@ if __name__ == "__main__":
             break
         elif choice == "1":
             policy_type = "act"
-            pretrained_path = "outputs/11-14/acttest/checkpoints/last/pretrained_model"
+            pretrained_path = "outputs/11-19/act/checkpoints/last/pretrained_model"
         elif choice == "2":
             policy_type = "diffusion"
-            pretrained_path = "outputs/11-14/diffusion/checkpoints/last/pretrained_model"
+            pretrained_path = "outputs/11-19/diffusion/checkpoints/last/pretrained_model"
         elif choice == "3":
             policy_type = "smolvla"
-            pretrained_path = "outputs/11-14/smolvla/checkpoints/last/pretrained_model"
+            pretrained_path = "outputs/11-19/smolvla/checkpoints/last/pretrained_model"
         else:
             print("输入无效，请重新选择")
             continue
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             "--robot.disable_torque_on_disconnect", "true",
             "--robot.use_degrees", "false",
             "--robot.cameras",
-            '{"front": {"type": "opencv", "index_or_path": 2, "width": 640, "height": 480, "fps": 30}}',
+            '{"camera1": {"type": "opencv", "index_or_path": 2, "width": 640, "height": 480, "fps": 30}}',
         ]
 
         print(f"\n>>> 启动策略: {policy_type}, 模型路径: {pretrained_path}")
