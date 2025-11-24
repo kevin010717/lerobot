@@ -11,9 +11,11 @@ export HF_ENDPOINT=https://hf-mirror.com # 解决huggingface访问慢的问题
 # todo:
 # *用checkpoint推理
 # *lerobot 0.4.2迁移
-# smolla训练数据格式不匹配，diffusion推理不动
+# *添加相机支架
+# *smolla训练数据格式不匹配，diffusion推理不动
+# 顶部相机安装
+# 200组数据采，训，推
 # pi groot数据采集，训练，推理
-# 为策略增加prompt输入
 # t700机器人数据采集系统搭建                  11.31开工
 # vr，视觉遥操系统搭建，关联仿真，产线数据采集，数据增强
 # openvla openpi opengalaxea框架
@@ -31,9 +33,3 @@ export HF_ENDPOINT=https://hf-mirror.com # 解决huggingface访问慢的问题
 #7   0-1-2-3-4-5-6-*-*-9
 #8   0-1-2-3-4-*-6-7-8-*
 #9   0-1-2-3-4-5-*-7-8-9
-
-# 数据集数量，相机种类，数量，
-# 300组数据，act策略，抓取包装盒到泡沫垫上，成功率90%
-# 500组数据，act策略，抓取包装盒到泡沫垫上，成功率92%
-# 1000组数据，act策略，抓取包装盒到泡沫垫上，成功率94%
-# 2000组数据，act策略，抓取包装盒到泡沫垫上，成功率95%
