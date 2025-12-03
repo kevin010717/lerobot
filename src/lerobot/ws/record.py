@@ -72,7 +72,7 @@ if __name__ == "__main__":
             "--robot.port=/dev/ttyACM1",
             "--robot.id=my_awesome_follower_arm",
             # '--robot.cameras={"front": {"type": "opencv", "index_or_path": 2, "width": 640, "height": 480, "fps": 30}}',
-            '--robot.cameras={"camera1": {"type": "opencv", "index_or_path": 2, "width": 640, "height": 480, "fps": 30}}',
+            '--robot.cameras={"camera1": {"type": "opencv", "index_or_path": 4, "width": 640, "height": 480, "fps": 30}}',
 
             # Teleop（主控臂）
             "--teleop.type=gello_leader",
@@ -82,10 +82,10 @@ if __name__ == "__main__":
 
             # Dataset（只本地）
             "--dataset.repo_id=seeedstudio123/test",
-            "--dataset.root=/home/robot/lerobot/outputs/11-19/record",                    # data root
+            "--dataset.root=/home/robot/lerobot/outputs/11-19/recordtest",                    # data root
             "--dataset.single_task=Pick up the packaging box and place it onto the foam pad.",
-            "--dataset.num_episodes=25",
-            "--dataset.episode_time_s=60",
+            "--dataset.num_episodes=1",
+            "--dataset.episode_time_s=6",
             "--dataset.reset_time_s=10",        # ← 拼写必须是 reset_time_s
             "--dataset.fps=30",
             "--dataset.video=true",
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             # 其他
             "--display_data=false",
             "--play_sounds=true",
-            "--resume=true",
+            "--resume=false",
         ]
         else:
             print("输入无效，请重新选择")
